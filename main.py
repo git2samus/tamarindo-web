@@ -1,7 +1,11 @@
 #!/usr/bin/env python
+import cgi
 
-from google.appengine.ext import webapp
+from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import util
+
+class Node(db.Model):
+    title = db.StringProperty()
 
 
 class MainHandler(webapp.RequestHandler):
@@ -10,6 +14,12 @@ class MainHandler(webapp.RequestHandler):
         body = """<form action="." method="post"><input type="text" name="title"><input type="submit" value="Add"></form>"""
         page = """<html><head>%s</head><body>%s</body></html>""" % (head, body)
         self.response.out.write(page)
+
+    def post(self):
+        node = Node()
+        node.title = cgi.escape(self.request.get('title'))
+        node.put()
+        self.redirect('/')
 
 
 def main():
