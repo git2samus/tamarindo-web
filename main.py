@@ -9,6 +9,14 @@ class Node(db.Model):
     associations = db.ListProperty(db.Key)
 
 
+def chart_url(nodes):
+    nodes_dict = dict((node.key(), node) for node in nodes)
+
+    title = lambda node: "\"%s\"" % node.title.replace("\\", "\\\\").replace("\"", "\\\"")
+    assoc = lambda node: ','.join("%s->%s" % (title(node), title(nodes_dict[child_key])) for child_key in node.associations)
+    digraph = ','.join(assoc(node) if node.associations else title(node) for node in nodes)
+    return "http://chart.googleapis.com/chart?cht=gv&amp;chl=digraph{%s}" % urllib.quote(digraph)
+
 class MainHandler(webapp.RequestHandler):
     def get(self):
         nodes = Node.all()
@@ -27,9 +35,7 @@ class MainHandler(webapp.RequestHandler):
                """<ul>%s</ul>""" % ''.join(
             """<li><a href="#%d">%s</a></li>""" % (node.key().id(), node.title) for node in sorted_nodes
         )
-        rcol = """<img src="http://chart.googleapis.com/chart?cht=gv&amp;chl=digraph{%s}">""" % urllib.quote(
-            ','.join("\"%s\"" % node.title.replace("\\", "\\\\").replace("\"", "\\\"") for node in nodes)
-        )
+        rcol = """<img src="%s">""" % chart_url(nodes)
         body = """<table><tr><td>%s</td><td>%s</td></tr></table>""" % (lcol, rcol)
         page = """<html><head>%s</head><body>%s</body></html>""" % (head, body)
 
