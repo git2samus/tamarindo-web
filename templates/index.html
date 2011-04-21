@@ -6,16 +6,18 @@
   </head>
 
   <body>
-    <div>{{ user.nickname }}</div>
+    <div><strong>{{ user.email }}</strong> - <small><a href="{{ logout_url }}">logout</a></small></div>
+    <hr>
     <table>
       <tr>
-        <td>
+        <td valign="top">
           <form action="." method="post">
             <div>
               <input type="text" name="title">
               <input type="submit" value="Add">
             </div>
           </form>
+          <br>
           <form action="." method="post">
             <div>
               <select name="assoc_from">

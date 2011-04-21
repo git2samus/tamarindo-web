@@ -22,6 +22,7 @@ class MainHandler(RequestHandler):
             'nodes': nodes,
             'digraph': digraph,
             'chart_url': chart_url,
+            'logout_url': users.create_logout_url('/')
         }
 
         page = template.render('templates/index.html', context)
