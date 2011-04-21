@@ -10,25 +10,22 @@ class MainHandler(RequestHandler):
     def get(self):
         user = users.get_current_user()
 
-        if user:
-            nodes = Node.all()
-            nodes.order('title')
+        nodes = Node.all()
+        nodes.order('title')
 
-            nodes_dict = dict((node.key(), node) for node in nodes)
-            digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
-            chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
+        nodes_dict = dict((node.key(), node) for node in nodes)
+        digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
+        chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
 
-            context = {
-                'user': user,
-                'nodes': nodes,
-                'digraph': digraph,
-                'chart_url': chart_url,
-            }
+        context = {
+            'user': user,
+            'nodes': nodes,
+            'digraph': digraph,
+            'chart_url': chart_url,
+        }
 
-            page = template.render('templates/index.html', context)
-            self.response.out.write(page)
-        else:
-            self.redirect(users.create_login_url(self.request.uri))
+        page = template.render('templates/index.html', context)
+        self.response.out.write(page)
 
     def post(self):
         title = self.request.get('title')
