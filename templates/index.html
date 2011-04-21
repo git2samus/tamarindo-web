@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Tamarindo</title>
+  </head>
+
+  <body>
+    <table>
+      <tr>
+        <td>
+          <form action="." method="post">
+            <div>
+              <input type="text" name="title">
+              <input type="submit" value="Add">
+            </div>
+          </form>
+          <form action="." method="post">
+            <div>
+              <select name="assoc_from">
+                <option>---</option>
+                {% for node in nodes %}
+                  <option value="{{ node.key.id }}">{{ node.title }}</option>
+                {% endfor %}
+              </select>
+              -&gt;
+              <select name="assoc_to">
+                <option>---</option>
+                {% for node in nodes %}
+                  <option value="{{ node.key.id }}">{{ node.title }}</option>
+                {% endfor %}
+              </select>
+              <input type="submit" value="Connect">
+
+              <ul>
+                {% for node in nodes %}
+                  <li><a href="#{{ node.key.id }}">{{ node.title }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          </form>
+        </td>
+        <td>
+          <img src="{{ chart_url }}" alt="{{ digraph }}">
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

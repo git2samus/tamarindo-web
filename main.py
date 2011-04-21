@@ -1,8 +1,11 @@
 #!/usr/bin/env python
-import cgi, urllib
+from google.appengine.dist import use_library
+use_library('django', '1.2')
+
+import urllib
 
 from google.appengine.ext import webapp
-from google.appengine.ext.webapp import util
+from google.appengine.ext.webapp import util, template
 
 from models import Node
 
@@ -13,25 +16,16 @@ class MainHandler(webapp.RequestHandler):
         nodes.order('title')
 
         nodes_dict = dict((node.key(), node) for node in nodes)
-        digraph = ','.join(node.digraph(nodes_dict) for node in nodes)
+        digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
+        chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
 
-        head = """<title>Tamarindo</title>"""
-        lcol = """<form action="." method="post"><input type="text" name="title"><input type="submit" value="Add"></form>""" + \
-               """<form action="." method="post">%s -> %s <input type="submit" value="Connect"></form>""" % (
-            """<select name="assoc_from"><option>---</option>%s</select>""" % ''.join(
-                """<option value="%d">%s</option>""" % (node.key().id(), node.title) for node in nodes
-            ),
-            """<select name="assoc_to"><option>---</option>%s</select>""" % ''.join(
-                """<option value="%d">%s</option>""" % (node.key().id(), node.title) for node in nodes
-            ),
-        ) + \
-               """<ul>%s</ul>""" % ''.join(
-            """<li><a href="#%d">%s</a></li>""" % (node.key().id(), node.title) for node in nodes
-        )
-        rcol = """<img src="http://chart.googleapis.com/chart?cht=gv&amp;chl=digraph{%s}">""" % urllib.quote(digraph)
-        body = """<table><tr><td>%s</td><td>%s</td></tr></table>""" % (lcol, rcol)
-        page = """<html><head>%s</head><body>%s</body></html>""" % (head, body)
+        context = {
+            'nodes': nodes,
+            'digraph': digraph,
+            'chart_url': chart_url,
+        }
 
+        page = template.render('templates/index.html', context)
         self.response.out.write(page)
 
     def post(self):
@@ -40,7 +34,7 @@ class MainHandler(webapp.RequestHandler):
 
         if title:
             node = Node()
-            node.title = cgi.escape(title)
+            node.title = title
             node.put()
         elif assoc_from and assoc_to and assoc_from.isdigit() and assoc_to.isdigit():
             node_from, node_to = Node.get_by_id(long(assoc_from)), Node.get_by_id(long(assoc_to))
