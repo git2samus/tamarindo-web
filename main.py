@@ -4,29 +4,37 @@ use_library('django', '1.2')
 
 import urllib
 
+from google.appengine.api import users
 from google.appengine.ext import webapp
-from google.appengine.ext.webapp import util, template
+from google.appengine.ext.webapp import template
+from google.appengine.ext.webapp.util import run_wsgi_app
 
 from models import Node
 
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
-        nodes = Node.all()
-        nodes.order('title')
+        user = users.get_current_user()
 
-        nodes_dict = dict((node.key(), node) for node in nodes)
-        digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
-        chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
+        if user:
+            nodes = Node.all()
+            nodes.order('title')
 
-        context = {
-            'nodes': nodes,
-            'digraph': digraph,
-            'chart_url': chart_url,
-        }
+            nodes_dict = dict((node.key(), node) for node in nodes)
+            digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
+            chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
 
-        page = template.render('templates/index.html', context)
-        self.response.out.write(page)
+            context = {
+                'user': user,
+                'nodes': nodes,
+                'digraph': digraph,
+                'chart_url': chart_url,
+            }
+
+            page = template.render('templates/index.html', context)
+            self.response.out.write(page)
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
 
     def post(self):
         title = self.request.get('title')
@@ -47,7 +55,7 @@ class MainHandler(webapp.RequestHandler):
 
 def main():
     application = webapp.WSGIApplication([('/', MainHandler)], debug=True)
-    util.run_wsgi_app(application)
+    run_wsgi_app(application)
 
 
 if __name__ == '__main__':
