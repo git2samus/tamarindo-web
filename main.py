@@ -2,6 +2,8 @@
 from google.appengine.dist import use_library
 use_library('django', '1.2')
 
+import os
+
 from google.appengine.ext.webapp import WSGIApplication
 from google.appengine.ext.webapp.util import run_wsgi_app
 
@@ -9,7 +11,9 @@ from views import MainHandler
 
 
 def main():
-    application = WSGIApplication([('/', MainHandler)], debug=True)
+    debug = os.environ['SERVER_SOFTWARE'].startswith('Development')
+
+    application = WSGIApplication([('/', MainHandler)], debug=debug)
     run_wsgi_app(application)
 
 
