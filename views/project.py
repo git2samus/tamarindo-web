@@ -4,6 +4,7 @@ from google.appengine.api import users
 from google.appengine.ext.webapp import RequestHandler, template
 
 from models import Project, Node
+from utils import context_dict
 
 
 class ProjectHandler(RequestHandler):
@@ -21,13 +22,8 @@ class ProjectHandler(RequestHandler):
             digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
             chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
 
-            context = {
-                'user': user,
-                'nodes': nodes,
-                'digraph': digraph,
-                'chart_url': chart_url,
-                'logout_url': users.create_logout_url('/')
-            }
+            context = context_dict(locals(), 'user', 'nodes', 'digraph', 'chart_url')
+            context['logout_url'] = users.create_logout_url('/')
 
             page = template.render('templates/project.html', context)
             self.response.out.write(page)
