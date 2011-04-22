@@ -25,7 +25,7 @@ class MainHandler(RequestHandler):
             'logout_url': users.create_logout_url('/')
         }
 
-        page = template.render('templates/index.html', context)
+        page = template.render('templates/main.html', context)
         self.response.out.write(page)
 
     def post(self):
