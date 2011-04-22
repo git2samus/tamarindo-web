@@ -1,2 +1,2 @@
 from views.dashboard import DashboardHandler
-from views.main import MainHandler
+from views.project import ProjectHandler

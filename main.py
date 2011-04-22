@@ -12,7 +12,8 @@ from views import *
 
 def main():
     urlconf = [
-        ('/', DashboardHandler),
+        (r'/(\d+)/', ProjectHandler),
+        (r'/',       DashboardHandler),
     ]
 
     debug = os.environ['SERVER_SOFTWARE'].startswith('Development')
