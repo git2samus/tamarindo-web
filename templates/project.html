@@ -1,13 +1,15 @@
 {% extends "layout.html" %}
 
 {% block "innerbody" %}
+  <div><small><a href="/">Change Project</a></small></div>
+  <h2>{{ project.title }}</h2>
   <table>
     <tr>
       <td valign="top">
         <form action="." method="post">
           <div>
             <input type="text" name="title">
-            <input type="submit" value="Add">
+            <input type="submit" value="Add Node">
           </div>
         </form>
         <br>

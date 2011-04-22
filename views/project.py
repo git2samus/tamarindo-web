@@ -33,7 +33,7 @@ class ProjectHandler(RequestHandler):
         digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
         chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
 
-        context = context_dict(locals(), 'user', 'nodes', 'digraph', 'chart_url')
+        context = context_dict(locals(), 'user', 'project', 'nodes', 'digraph', 'chart_url')
         context['logout_url'] = users.create_logout_url('/')
 
         page = template.render('templates/project.html', context)
