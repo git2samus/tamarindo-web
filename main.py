@@ -7,13 +7,16 @@ import os
 from google.appengine.ext.webapp import WSGIApplication
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from views import MainHandler
+from views import *
 
 
 def main():
-    debug = os.environ['SERVER_SOFTWARE'].startswith('Development')
+    urlconf = [
+        ('/', DashboardHandler),
+    ]
 
-    application = WSGIApplication([('/', MainHandler)], debug=debug)
+    debug = os.environ['SERVER_SOFTWARE'].startswith('Development')
+    application = WSGIApplication(urlconf, debug=debug)
     run_wsgi_app(application)
 
 
