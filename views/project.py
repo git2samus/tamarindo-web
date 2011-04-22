@@ -7,53 +7,53 @@ from models import Project, Node
 from utils import context_dict
 
 
+def decorator(f):
+    def wrapper(self, project_id):
+        project = Project.get_by_id(long(project_id))
+        if project:
+            user = users.get_current_user()
+            if project.owner == user.user_id():
+                f(self, user, project)
+            else:
+                self.error(403)
+        else:
+            self.redirect('/')
+
+    return wrapper
+
 class ProjectHandler(RequestHandler):
-    def get(self, project_id):
-        project = Project.get_by_id(long(project_id))
-        if project:
-            user = users.get_current_user()
-            if project.owner == user.user_id():
-                nodes = Node.all()
-                nodes.ancestor(project)
-                nodes.order('title')
-                nodes = tuple(nodes) # prevent re-execution when iterating
+    @decorator
+    def get(self, user, project):
+        nodes = Node.all()
+        nodes.ancestor(project)
+        nodes.order('title')
+        nodes = tuple(nodes) # prevent re-execution when iterating
 
-                nodes_dict = dict((node.key(), node) for node in nodes)
-                digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
-                chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
+        nodes_dict = dict((node.key(), node) for node in nodes)
+        digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
+        chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
 
-                context = context_dict(locals(), 'user', 'nodes', 'digraph', 'chart_url')
-                context['logout_url'] = users.create_logout_url('/')
+        context = context_dict(locals(), 'user', 'nodes', 'digraph', 'chart_url')
+        context['logout_url'] = users.create_logout_url('/')
 
-                page = template.render('templates/project.html', context)
-                self.response.out.write(page)
-            else:
-                self.error(403)
-        else:
-            self.redirect('/')
+        page = template.render('templates/project.html', context)
+        self.response.out.write(page)
 
-    def post(self, project_id):
-        project = Project.get_by_id(long(project_id))
-        if project:
-            user = users.get_current_user()
-            if project.owner == user.user_id():
-                title = self.request.get('title')
-                assoc_from, assoc_to = self.request.get('assoc_from'), self.request.get('assoc_to')
+    @decorator
+    def post(self, user, project):
+        title = self.request.get('title')
+        assoc_from, assoc_to = self.request.get('assoc_from'), self.request.get('assoc_to')
 
-                if title:
-                    Node(
-                        parent=project,
-                        title=title,
-                    ).put()
-                elif assoc_from and assoc_to and assoc_from.isdigit() and assoc_to.isdigit():
-                    node_from, node_to = Node.get_by_id(long(assoc_from)), Node.get_by_id(long(assoc_to))
-                    if node_from and node_to:
-                        node_from.associations.append(node_to.key())
-                        node_from.put()
+        if title:
+            Node(
+                parent=project,
+                title=title,
+            ).put()
+        elif assoc_from and assoc_to and assoc_from.isdigit() and assoc_to.isdigit():
+            node_from, node_to = Node.get_by_id(long(assoc_from)), Node.get_by_id(long(assoc_to))
+            if node_from and node_to:
+                node_from.associations.append(node_to.key())
+                node_from.put()
 
-                self.redirect("/%s/" % project_id)
-            else:
-                self.error(403)
-        else:
-            self.redirect('/')
+        self.redirect("/%d/" % project.key().id())
 
