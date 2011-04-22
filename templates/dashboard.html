@@ -1,5 +1,23 @@
 {% extends "layout.html" %}
 
 {% block "innerbody" %}
-dashboard
+<h2>My Projects</h2>
+{% if projects %}
+  <ul>
+    {% for project in projects %}
+      <li>
+        <a href="{{ project.key.id }}">{{ project.title }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+<form action="." method="post">
+  <div>
+    <label>
+      New project:
+      <input type="text" name="title">
+    </label>
+    <input type="submit" value="Create">
+  </div>
+</form>
 {% endblock %}
