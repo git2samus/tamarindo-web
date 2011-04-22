@@ -5,7 +5,7 @@ api_version: 1
 
 handlers:
 - url: /(\d+/)?
-  script: main.py
+  script: cgi_main.py
   login: required
 - url: .*
-  script: not_found.py
+  script: cgi_not_found.py
