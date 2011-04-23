@@ -32,7 +32,7 @@
 
             <ul>
               {% for node in nodes %}
-                <li><a href="#{{ node.key.id }}">{{ node.title }}</a></li>
+                <li><a href="/{{ project.key.id }}/?node={{ node.key.id }}">{{ node.title }}</a></li>
               {% endfor %}
             </ul>
           </div>

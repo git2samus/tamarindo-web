@@ -13,7 +13,27 @@ def decorator(f):
         if project:
             user = users.get_current_user()
             if project.owner == user.user_id():
-                f(self, user, project)
+                nodes = Node.all()
+                nodes.ancestor(project)
+                nodes.order('title')
+                nodes = tuple(nodes) # prevent re-execution when iterating
+
+                request_node, current_node = self.request.get('node'), None
+                if request_node: # self.request.get always return a string
+                    try:
+                        current_node_id = long(request_node)
+                    except ValueError:
+                        pass
+                    else:
+                        for node in nodes:
+                            if node.key().id() == current_node_id:
+                                current_node = node
+                                break
+                    if current_node is None:
+                        self.redirect("/%d/" % project.key().id())
+                        return
+
+                f(self, user, project, nodes, current_node)
             else:
                 self.error(403)
         else:
@@ -23,12 +43,7 @@ def decorator(f):
 
 class ProjectHandler(RequestHandler):
     @decorator
-    def get(self, user, project):
-        nodes = Node.all()
-        nodes.ancestor(project)
-        nodes.order('title')
-        nodes = tuple(nodes) # prevent re-execution when iterating
-
+    def get(self, user, project, nodes, current_node=None):
         nodes_dict = dict((node.key(), node) for node in nodes)
         digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
         chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
@@ -40,7 +55,7 @@ class ProjectHandler(RequestHandler):
         self.response.out.write(page)
 
     @decorator
-    def post(self, user, project):
+    def post(self, user, project, nodes, current_node=None):
         title = self.request.get('title')
         assoc_from, assoc_to = self.request.get('assoc_from'), self.request.get('assoc_to')
 
