@@ -48,7 +48,7 @@ class ProjectHandler(RequestHandler):
         digraph = "digraph{%s}" % ';'.join(node.digraph(nodes_dict) for node in nodes)
         chart_url = "http://chart.googleapis.com/chart?cht=gv&chl=%s" % urllib.quote(digraph)
 
-        context = context_dict(locals(), 'user', 'project', 'nodes', 'digraph', 'chart_url')
+        context = context_dict(locals(), 'user', 'project', 'nodes', 'current_node', 'digraph', 'chart_url')
         context['logout_url'] = users.create_logout_url('/')
 
         page = template.render('templates/project.html', context)
@@ -57,8 +57,6 @@ class ProjectHandler(RequestHandler):
     @decorator
     def post(self, user, project, nodes, current_node=None):
         title = self.request.get('title')
-        assoc_from, assoc_to = self.request.get('assoc_from'), self.request.get('assoc_to')
-
         if title:
             new_node = Node(
                 parent=project,
@@ -68,11 +66,20 @@ class ProjectHandler(RequestHandler):
 
             self.redirect(new_node.permalink)
             return
-        elif assoc_from and assoc_to and assoc_from.isdigit() and assoc_to.isdigit():
-            node_from, node_to = Node.get_by_id(long(assoc_from)), Node.get_by_id(long(assoc_to))
-            if node_from and node_to:
-                node_from.associations.append(node_to.key())
-                node_from.put()
+
+        if current_node:
+            try:
+                association_id = long(self.request.get('association'))
+            except ValueError:
+                pass
+            else:
+                association = Node.get_by_id(association_id, parent=project)
+                if association:
+                    current_node.associations.append(association.key())
+                    current_node.put()
+
+                    self.redirect(current_node.permalink)
+                    return
 
         self.redirect(project.permalink)
 

@@ -13,30 +13,43 @@
           </div>
         </form>
         <br>
-        <form action="." method="post">
-          <div>
-            <select name="assoc_from">
-              <option>---</option>
-              {% for node in nodes %}
-                <option value="{{ node.key.id }}">{{ node.title }}</option>
-              {% endfor %}
-            </select>
-            -&gt;
-            <select name="assoc_to">
-              <option>---</option>
-              {% for node in nodes %}
-                <option value="{{ node.key.id }}">{{ node.title }}</option>
-              {% endfor %}
-            </select>
-            <input type="submit" value="Connect">
-
-            <ul>
-              {% for node in nodes %}
-                <li><a href="{{ node.permalink }}">{{ node.title }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        </form>
+        {% if nodes %}
+          <ul>
+            {% for node in nodes %}
+              <li>
+                {% if current_node == node %}
+                  <strong>{{ current_node.title }}</strong>
+                  <form action="." method="post">
+                    <ul>
+                      {% for node2 in nodes %}
+                        {% if node2.key in current_node.associations %}
+                          <li>
+                            {{ node2.title }}
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                      {% if current_node.associations|length < nodes|length %}
+                        <li>
+                          <input type="hidden" name="node" value="{{ current_node.key.id }}">
+                          <select name="association">
+                            {% for node2 in nodes %}
+                              {% if node2.key not in current_node.associations %}
+                                <option value="{{ node2.key.id }}">{{ node2.title }}</option>
+                              {% endif %}
+                            {% endfor %}
+                          </select>
+                          <input type="submit" value="Associate">
+                        </li>
+                      {% endif %}
+                    </ul>
+                  </form>
+                {% else %}
+                  <a href="{{ node.permalink }}">{{ node.title }}</a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </td>
       <td>
         <img src="{{ chart_url }}" alt="{{ digraph }}">
