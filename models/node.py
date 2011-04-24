@@ -9,6 +9,11 @@ class Node(db.Model):
     def quoted_title(self):
         return "\"%s\"" % self.title.replace("\\", "\\\\").replace("\"", "\\\"")
 
+    @property
+    def permalink(self):
+        parent = self.parent()
+        return "%s?node=%d" % (parent.permalink, self.key().id())
+
     def digraph(self, nodes_dict=None):
         if self.associations:
             nodes_dict = nodes_dict or dict((node.key(), node) for node in Node.get(self.associations))
