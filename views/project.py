@@ -88,8 +88,10 @@ class ProjectHandler(RequestHandler):
             else:
                 association = Node.get_by_id(association_id, parent=project)
                 if association:
-                    current_node.associations.append(association.key())
-                    current_node.associations = list(set(current_node.associations))
+                    associations = set(current_node.associations)
+                    associations.add(association.key())
+                    associations.discard(current_node.key())
+                    current_node.associations = list(associations)
                     current_node.put()
 
                     self.redirect(current_node.permalink)

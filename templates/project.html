@@ -28,12 +28,12 @@
                           </li>
                         {% endif %}
                       {% endfor %}
-                      {% if current_node.associations|length < nodes|length %}
+                      {% if current_node.associations|length < nodes|length|add:"-1" %}
                         <li>
                           <input type="hidden" name="node" value="{{ current_node.key.id }}">
                           <select name="association">
                             {% for node2 in nodes %}
-                              {% if node2.key not in current_node.associations %}
+                              {% if current_node != node2 and node2.key not in current_node.associations %}
                                 <option value="{{ node2.key.id }}">{{ node2.title }}</option>
                               {% endif %}
                             {% endfor %}
