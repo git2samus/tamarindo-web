@@ -8,3 +8,7 @@ class Project(db.Model):
     owner = db.StringProperty()
     title = db.StringProperty()
 
+    @property
+    def permalink(self):
+        return "/%d/" % self.key().id()
+

@@ -6,7 +6,7 @@
   <ul>
     {% for project in projects %}
       <li>
-        <a href="/{{ project.key.id }}/">{{ project.title }}</a>
+        <a href="{{ project.permalink }}">{{ project.title }}</a>
       </li>
     {% endfor %}
   </ul>

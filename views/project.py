@@ -30,7 +30,7 @@ def decorator(f):
                                 current_node = node
                                 break
                     if current_node is None:
-                        self.redirect("/%d/" % project.key().id())
+                        self.redirect(project.permalink)
                         return
 
                 f(self, user, project, nodes, current_node)
@@ -70,5 +70,5 @@ class ProjectHandler(RequestHandler):
                 node_from.associations.append(node_to.key())
                 node_from.put()
 
-        self.redirect("/%d/" % project.key().id())
+        self.redirect(project.permalink)
 
