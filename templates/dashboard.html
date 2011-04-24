@@ -2,15 +2,6 @@
 
 {% block "innerbody" %}
 <h2>My Projects</h2>
-{% if projects %}
-  <ul>
-    {% for project in projects %}
-      <li>
-        <a href="{{ project.permalink }}">{{ project.title }}</a>
-      </li>
-    {% endfor %}
-  </ul>
-{% endif %}
 <form action="." method="post">
   <div>
     <label>
@@ -20,4 +11,13 @@
     <input type="submit" value="Create">
   </div>
 </form>
+{% if projects %}
+  <ul>
+    {% for project in projects %}
+      <li>
+        <a href="{{ project.permalink }}">{{ project.title }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
 {% endblock %}
