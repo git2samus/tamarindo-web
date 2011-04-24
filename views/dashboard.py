@@ -25,10 +25,14 @@ class DashboardHandler(RequestHandler):
 
         title = self.request.get('title')
         if title:
-            Project(
+            new_project = Project(
                 owner=user.user_id(),
                 title=title,
-            ).put()
+            )
+            new_project.put()
+
+            self.redirect(new_project.permalink)
+            return
 
         self.redirect('/')
 

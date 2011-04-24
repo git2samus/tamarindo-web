@@ -60,10 +60,14 @@ class ProjectHandler(RequestHandler):
         assoc_from, assoc_to = self.request.get('assoc_from'), self.request.get('assoc_to')
 
         if title:
-            Node(
+            new_node = Node(
                 parent=project,
                 title=title,
-            ).put()
+            )
+            new_node.put()
+
+            self.redirect(new_node.permalink)
+            return
         elif assoc_from and assoc_to and assoc_from.isdigit() and assoc_to.isdigit():
             node_from, node_to = Node.get_by_id(long(assoc_from)), Node.get_by_id(long(assoc_to))
             if node_from and node_to:
