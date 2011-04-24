@@ -1,6 +1,7 @@
 import urllib
 
 from google.appengine.api import users
+from google.appengine.ext import db
 from google.appengine.ext.webapp import RequestHandler, template
 
 from models import Project, Node
@@ -41,6 +42,7 @@ def decorator(f):
 
     return wrapper
 
+
 class ProjectHandler(RequestHandler):
     @decorator
     def get(self, user, project, nodes, current_node=None):
@@ -58,13 +60,24 @@ class ProjectHandler(RequestHandler):
     def post(self, user, project, nodes, current_node=None):
         title = self.request.get('title')
         if title:
-            new_node = Node(
-                parent=project,
-                title=title,
-            )
-            new_node.put()
+            def transaction():
+                q = Node.all()
+                q.ancestor(project)
+                q.filter('title =', title)
+                node = q.get()
 
-            self.redirect(new_node.permalink)
+                if node is None:
+                    node = Node(
+                        parent=project,
+                        title=title,
+                    )
+                    node.put()
+
+                return node
+
+            node = db.run_in_transaction(transaction)
+
+            self.redirect(node.permalink)
             return
 
         if current_node:
